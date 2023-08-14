@@ -179,13 +179,30 @@ int main(int argc, char *argv[])
     while (remaining > 0)
     {
         readSize = (int)(remaining < bufSize ? remaining : bufSize);
-        fread(buffer, sizeof(char), readSize, f);
+        if (fread(buffer, sizeof(char), readSize, f) != (size_t)readSize)
+        {
+            fclose(f);
+            if (hasOutFile)
+            {
+                fclose(f2);
+            }
+            halt("read failed or premature EOF was encountered");
+        }
+        
         buffer[readSize] = '\0';
         remaining -= readSize;
 
         if (hasOutFile)
         {
-            fwrite(buffer, sizeof(char), readSize, f2);
+            if (fwrite(buffer, sizeof(char), readSize, f2) != (size_t)readSize)
+            {
+                fclose(f);
+                if (hasOutFile)
+                {
+                    fclose(f2);
+                }
+                halt("write failed");
+            }
         }
         else
         {
