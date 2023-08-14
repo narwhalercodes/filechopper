@@ -1,5 +1,6 @@
 gcc -c -g -std=c11 -pedantic -Wno-pedantic-ms-format -Wall -Wextra ./source/main.c -o ./bin/main.o
-gcc -g ./bin/main.o -o ./bin/filechopper.exe
+gcc -c -g -std=c11 -pedantic -Wno-pedantic-ms-format -Wall -Wextra ./source/text.c -o ./bin/text.o
+gcc -g ./bin/main.o ./bin/text.o -o ./bin/filechopper.exe
 
 # ./bin/filechopper.exe <start/end/start-end> <nr of bytes from start or end, or two numbers if using start-end> [cap <max nr of bytes>] <input file name> [<to/append-to> <output file name>]
 # examples

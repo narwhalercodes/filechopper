@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <inttypes.h>
+#include "text.h"
 
 bool parseInt64(char *s, int64_t *result)
 {
@@ -90,7 +91,25 @@ int main(int argc, char *argv[])
             halt("parse failed [cap]");
     }
 
-    FILE *f = fopen(argv[inFileArg], "rb");
+    char *inFilePath = strdup(argv[inFileArg]);
+    int expandResult = expandEVs(&inFilePath, 3000, 40);
+    if (expandResult == -1)
+    {
+        free(inFilePath);
+        halt("enviroment variable expand failed [input file] (too large)");
+    }
+    if (expandResult == -2)
+    {
+        free(inFilePath);
+        halt("enviroment variable expand failed [input file] (unknown enviroment variable)");
+    }
+    if (expandResult == -3)
+    {
+        free(inFilePath);
+        halt("enviroment variable expand failed [input file] (too many expands)");
+    }
+    FILE *f = fopen(inFilePath, "rb");
+    free(inFilePath);
 
     if (f == NULL)
         halt("could not open input file");
@@ -98,7 +117,28 @@ int main(int argc, char *argv[])
     FILE *f2;
     if (hasOutFile)
     {
-        f2 = fopen(argv[outFileArg], isTo ? "wb" : "ab");
+        char *outFilePath = strdup(argv[outFileArg]);
+        expandResult = expandEVs(&outFilePath, 3000, 40);
+        if (expandResult == -1)
+        {
+            fclose(f);
+            free(outFilePath);
+            halt("enviroment variable expand failed [output file] (too large)");
+        }
+        if (expandResult == -2)
+        {
+            fclose(f);
+            free(outFilePath);
+            halt("enviroment variable expand failed [output file] (unknown enviroment variable)");
+        }
+        if (expandResult == -3)
+        {
+            fclose(f);
+            free(outFilePath);
+            halt("enviroment variable expand failed [output file] (too many expands)");
+        }
+        f2 = fopen(outFilePath, isTo ? "wb" : "ab");
+        free(outFilePath);
 
         if (f2 == NULL)
         {
