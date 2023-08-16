@@ -250,6 +250,11 @@ int main(int argc, char *argv[])
         }
     }
     
+    if (!hasOutFile)
+    {
+        printf("\n");
+    }
+    
     fclose(f);
     if (hasOutFile)
     {
